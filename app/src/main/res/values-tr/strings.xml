@@ -7,7 +7,7 @@
     <string name="paste">Yapıştır</string>
     <string name="auto">Otomatik</string>
     <string name="instance">Örnek</string>
-    <string name="api_key">API Anahtarı</string>
+    <string name="api_key">API anahtarı</string>
     <string name="options">Ayarlar</string>
     <string name="fetch_delay_summary">Metin ekleme ve çeviriyi getirme arasındaki gecikme</string>
     <string name="history_summary">Son çevrilen metinleri takip edin</string>
@@ -43,11 +43,11 @@
     <string name="similar">Benzer</string>
     <string name="st_selected_engine">SimplyTranslate\'in çeviri için kullandığı motor</string>
     <string name="detected_language">Algılanan dil</string>
-    <string name="missing_api_key">Lütfen Ayarlar\'da bir API anahtarı belirtin!</string>
+    <string name="missing_api_key">Lütfen ayarlarda bir API anahtarı belirtin.</string>
     <string name="search">Arama</string>
     <string name="general">Genel</string>
     <string name="app_language">Uygulama dili</string>
-    <string name="translation">Tercüme</string>
+    <string name="translation">Çeviri</string>
     <string name="system">Sistem</string>
     <string name="character_warning_limit">Karakter uyarı sınırı</string>
     <string name="character_warning_limit_summary">Çevrilen metin azami uzunluğu aştığında uyar.</string>
@@ -61,4 +61,21 @@
     <string name="translate">Çevir</string>
     <string name="translate_automatically">Otomatik olarak çevir</string>
     <string name="translate_automatically_summary">Belirli bir gecikmeden sonra otomatik olarak çeviri iste.</string>
+    <string name="nothing_here">Burada bir şey yok.</string>
+    <string name="use_free_api_summary">Ücretli Pro API yerine ücretsiz olanı kullanın.</string>
+    <string name="use_free_api">Ücretsiz API\'yi kullan</string>
+    <string name="accent_color">Vurgu rengi</string>
+    <string name="dynamic_colors">Değişken renkler</string>
+    <string name="translate_to">Şuna çevir</string>
+    <string name="translate_from">Şundan çevir</string>
+    <string name="favorites">Sık kullanılanlar</string>
+    <string name="all_languages">Tüm diller</string>
+    <string name="skip_similar_entries">Benzer girdileri atla</string>
+    <string name="skip_similar_entries_desc">Ekleme ve dillere dayalı olarak yalnızca benzersiz girdileri geçmişe kaydet.</string>
+    <string name="select_theme">Tema Seç</string>
+    <string name="theme_black">Siyah</string>
+    <string name="irreversible">Bu geri alınamaz. Devam etmek istediğinize emin misiniz\?</string>
+    <string name="tess_summary">Tesseract bir optik karakter tanıma motorudur. Apache Lisansı altında yayımlanan özgür bir yazılımdır. Açık kaynaklı olarak 2005 yılında yayınlandı ve geliştirme 2006 yılından beri Google tarafından desteklenmektedir. Tesseract, en doğru açık kaynaklı OCR motorlarından biri olarak kabul edilmektedir. Daha fazla bilgi için %1$s sayfasına bakın.</string>
+    <string name="clear_favorites">Sık kullanılanları temizle</string>
+    <string name="clear">Temizle</string>
 </resources>

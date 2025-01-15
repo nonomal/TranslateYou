@@ -1,52 +1,87 @@
+/*
+ * Copyright (c) 2023 You Apps
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.bnyro.translate.ui.views
 
 import android.Manifest
 import android.app.Activity
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Handler
-import android.os.Looper
+import android.graphics.Bitmap
 import android.speech.SpeechRecognizer
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.DoneAll
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bnyro.translate.R
 import com.bnyro.translate.obj.MenuItemData
+import com.bnyro.translate.ui.components.ImageCropDialog
 import com.bnyro.translate.ui.components.StyledIconButton
 import com.bnyro.translate.ui.components.TopBarMenu
-import com.bnyro.translate.ui.models.MainModel
-import com.bnyro.translate.util.ClipboardHelper
+import com.bnyro.translate.ui.models.TranslationModel
+import com.bnyro.translate.util.ImageHelper
 import com.bnyro.translate.util.SpeechHelper
+import com.bnyro.translate.util.SpeechResultContract
+import java.util.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(
-    mainModel: MainModel = viewModel(),
+    mainModel: TranslationModel,
     menuItems: List<MenuItemData>
 ) {
     val context = LocalContext.current
-    val handler = Handler(Looper.getMainLooper())
-    val fileChooser = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) {
-        mainModel.processImage(context, it)
+    var bitmapToEdit by remember {
+        mutableStateOf<Bitmap?>(null)
+    }
+
+    val scope = rememberCoroutineScope()
+    val fileChooser =
+        rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+            scope.launch(Dispatchers.IO) {
+                bitmapToEdit = ImageHelper.getImage(context, uri ?: return@launch)
+            }
+        }
+    val speechRecognizer = rememberLauncherForActivityResult(SpeechResultContract()) {
+        if (it != null) {
+            mainModel.insertedText = it
+            mainModel.enqueueTranslation(context)
+        }
     }
 
     TopAppBar(
@@ -56,7 +91,11 @@ fun TopBar(
             )
         },
         actions = {
-            if (mainModel.insertedText == "" && SpeechRecognizer.isRecognitionAvailable(context)) {
+            AnimatedVisibility(
+                mainModel.insertedText.isEmpty() && SpeechRecognizer.isRecognitionAvailable(
+                    context
+                )
+            ) {
                 StyledIconButton(
                     imageVector = Icons.Default.Mic
                 ) {
@@ -70,14 +109,15 @@ fun TopBar(
                         return@StyledIconButton
                     }
 
-                    SpeechHelper.recognizeSpeech(context as Activity) {
-                        mainModel.insertedText = it
-                        mainModel.enqueueTranslation()
+                    try {
+                        speechRecognizer.launch(Locale.getDefault())
+                    } catch (e: Exception) {
+                        Log.e(this::javaClass.name, e.stackTraceToString())
                     }
                 }
             }
 
-            if (mainModel.insertedText == "") {
+            AnimatedVisibility(mainModel.insertedText.isEmpty()) {
                 StyledIconButton(
                     imageVector = Icons.Default.Image
                 ) {
@@ -88,45 +128,25 @@ fun TopBar(
                 }
             }
 
-            var copyImageVector by remember {
-                mutableStateOf(Icons.Default.ContentCopy)
-            }
+            AnimatedVisibility(mainModel.translation.translatedText.isNotEmpty()) {
+                var favoriteIcon by remember {
+                    mutableStateOf(Icons.Default.FavoriteBorder)
+                }
 
-            if (mainModel.translation.translatedText != "") {
+                LaunchedEffect(mainModel.translation) {
+                    favoriteIcon = Icons.Default.FavoriteBorder
+                }
+
                 StyledIconButton(
-                    imageVector = copyImageVector,
+                    imageVector = favoriteIcon,
                     onClick = {
-                        ClipboardHelper(
-                            context
-                        ).write(
-                            mainModel.translation.translatedText
-                        )
-                        copyImageVector = Icons.Default.DoneAll
-                        handler.postDelayed({
-                            copyImageVector = Icons.Default.ContentCopy
-                        }, 2000)
+                        favoriteIcon = Icons.Default.Favorite
+                        mainModel.saveToFavorites()
                     }
                 )
             }
 
-            if (mainModel.translation.translatedText != "") {
-                StyledIconButton(
-                    imageVector = Icons.Default.Share,
-                    onClick = {
-                        val sendIntent: Intent = Intent().apply {
-                            action = Intent.ACTION_SEND
-                            putExtra(Intent.EXTRA_TEXT, mainModel.translation.translatedText)
-                            type = "text/plain"
-                        }
-
-                        val shareIntent = Intent.createChooser(sendIntent, null)
-                        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        context.startActivity(shareIntent)
-                    }
-                )
-            }
-
-            if (mainModel.insertedText != "") {
+            AnimatedVisibility(mainModel.insertedText.isNotEmpty()) {
                 StyledIconButton(
                     imageVector = Icons.Default.Clear,
                     onClick = {
@@ -138,4 +158,13 @@ fun TopBar(
             TopBarMenu(menuItems)
         }
     )
+
+    bitmapToEdit?.let { bitmap ->
+        ImageCropDialog(
+            bitmap = bitmap,
+            onEditedBitmap = { newBitmap ->
+                mainModel.processImage(context, newBitmap)
+            }
+        ) { bitmapToEdit = null }
+    }
 }
