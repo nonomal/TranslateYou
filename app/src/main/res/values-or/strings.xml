@@ -9,7 +9,7 @@
     <string name="api_key">API କି</string>
     <string name="options">ସେଟିଂ</string>
     <string name="history">ଇତିହାସ</string>
-    <string name="about">ବିଷୟରେ</string>
+    <string name="about">ସମ୍ବନ୍ଧରେ</string>
     <string name="history_enabled">ଇତିହାସ ସକ୍ଷମ</string>
     <string name="theme_dark">ଅନ୍ଧାର</string>
     <string name="clear_history">ଇତିହାସ ଖାଲି କରନ୍ତୁ</string>
@@ -32,7 +32,7 @@
     <string name="theme_auto">ସିଷ୍ଟମ୍</string>
     <string name="theme_light">ଉଜ୍ଜଳ</string>
     <string name="selected_engine">ମନୋନୀତ ଇଞ୍ଜିନ୍</string>
-    <string name="missing_api_key">ଦୟାକରି ସେଟିଂସମୂହରେ ଏକ API କି ପ୍ରଦାନ କରନ୍ତୁ !</string>
+    <string name="missing_api_key">ଦୟାକରି ସେଟିଂସମୂହରେ ଏକ API କି ପ୍ରଦାନ କରନ୍ତୁ ।</string>
     <string name="detected_language">ଚିହ୍ନିତ ଭାଷା</string>
     <string name="definition">ସଂଜ୍ଞା</string>
     <string name="example">ଉଦାହରଣ</string>
@@ -60,4 +60,19 @@
     <string name="translate">ଅନୁବାଦ କରନ୍ତୁ</string>
     <string name="translate_automatically">ସ୍ୱୟଂଚାଳିତ ଭାବରେ ଅନୁବାଦ କରନ୍ତୁ</string>
     <string name="translate_automatically_summary">ଏକ ନିର୍ଦ୍ଦିଷ୍ଟ ବିଳମ୍ବ ପରେ ସ୍ୱୟଂଚାଳିତ ଭାବରେ ଏକ ଅନୁବାଦ ପାଇଁ ଅନୁରୋଧ ।</string>
+    <string name="nothing_here">ଏଠାରେ କିଛି ନାହିଁ ।</string>
+    <string name="use_free_api">ମାଗଣା API ବ୍ୟବହାର କରନ୍ତୁ</string>
+    <string name="use_free_api_summary">ଦେୟଯୁକ୍ତ ପ୍ରୋ API ପରିବର୍ତ୍ତେ ମାଗଣା ବ୍ୟବହାର କରନ୍ତୁ ।</string>
+    <string name="translate_to">ଏହି ଭାଷା କୁ ଅନୁବାଦ କରନ୍ତୁ</string>
+    <string name="translate_from">ଏହି ଭାଷା ରୁ ଅନୁବାଦ କରନ୍ତୁ</string>
+    <string name="favorites">ପସନ୍ଦ ଗୁଡିକ</string>
+    <string name="all_languages">ସମସ୍ତ ଭାଷା</string>
+    <string name="accent_color">ଉଚ୍ଚାରଣ ରଙ୍ଗ</string>
+    <string name="dynamic_colors">ଗତିଶୀଳ ରଙ୍ଗ</string>
+    <string name="skip_similar_entries_desc">ଭରଣ ଏବଂ ଭାଷା ଉପରେ ଆଧାର କରି ଇତିହାସରେ କେବଳ ଅଦ୍ୱିତୀୟ ଭରଣଗୁଡ଼ିକୁ ସଂରକ୍ଷଣ କରନ୍ତୁ ।</string>
+    <string name="skip_similar_entries">ସମାନ ପ୍ରବିଷ୍ଟଗୁଡ଼ିକୁ ଏଡ଼ାଇଦିଅ</string>
+    <string name="select_theme">ଥିମ୍ ଚୟନ କରନ୍ତୁ</string>
+    <string name="theme_black">କଳା</string>
+    <string name="irreversible">ଏହାକୁ ଏଡ଼ାଇ ଦିଆଯାଇପାରିବ ନାହିଁ । ଆପଣ ଅଗ୍ରସର ହେବାକୁ ଚାହୁଁଛନ୍ତି ବୋଲି ନିଶ୍ଚିତ କି\?</string>
+    <string name="tess_summary">Tesseract ହେଉଛି ଏକ ଅପ୍ଟିକାଲ ଅକ୍ଷର ଚିହ୍ନିତ ଇଞ୍ଜିନ । ଏହା ଏକ ମାଗଣା ସଫ୍ଟୱେର, ଆପାଚି ଲାଇସେନ୍ସ ଅଧୀନରେ ମୁକ୍ତିଲାଭ କରିଛି । ୨୦୦୫ ମସିହାରେ ଏହା ଓପନ ସୋର୍ସ ଭାବେ ଉନ୍ମୋଚିତ ହୋଇଥିଲା ଏବଂ ୨୦୦୬ ମସିହାରୁ ଗୁଗୁଲ ଏହାର ପ୍ରଯୋଜନା କରିଆସୁଛି । ଟେସେରାକ୍ଟକୁ ସବୁଠାରୁ ସଠିକ ଓପନ-ସୋର୍ସ ଓସିଆର ଇଞ୍ଜିନ ମଧ୍ୟରୁ ଗୋଟିଏ ବୋଲି ବିବେଚନା କରାଯାଏ । ଅଧିକ ସୂଚନା ପାଇଁ, %1$s ଦେଖନ୍ତୁ ।</string>
 </resources>

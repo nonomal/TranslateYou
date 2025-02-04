@@ -7,7 +7,7 @@
     <string name="forget">Uita</string>
     <string name="language_not_supported">Limba nu este suportată!</string>
     <string name="instance">Instanță</string>
-    <string name="api_key">Cheia Api</string>
+    <string name="api_key">Cheia API</string>
     <string name="options">Setări</string>
     <string name="fetch_delay">Întârzierea traducerii</string>
     <string name="history_summary">Urmăriți ultimele texte traduse</string>
@@ -31,7 +31,7 @@
     <string name="clear_history">Șterge istoricul</string>
     <string name="open">Deschide</string>
     <string name="server_error">Eroare în comunicarea cu serverul.</string>
-    <string name="missing_api_key">Vă rugăm să furnizați o cheie API în Setări!</string>
+    <string name="missing_api_key">Vă rugăm să furnizați o cheie API în setări.</string>
     <string name="definition">Definiție</string>
     <string name="example">Exemplu</string>
     <string name="similar">Asemănător</string>
@@ -60,4 +60,21 @@
     <string name="translate_automatically_summary">Solicitați o traducere automat după o anumită întârziere.</string>
     <string name="translate">Traduceți</string>
     <string name="translate_automatically">Traduceți automat</string>
+    <string name="nothing_here">Nimic aici.</string>
+    <string name="use_free_api">Utilizează un API gratuită</string>
+    <string name="use_free_api_summary">Folosește API-ul gratuită în loc de API-ul Pro cu plată.</string>
+    <string name="dynamic_colors">Culori dinamice</string>
+    <string name="accent_color">Culoare accent</string>
+    <string name="translate_to">Traducere în</string>
+    <string name="translate_from">Traduceți din</string>
+    <string name="favorites">Preferințe</string>
+    <string name="all_languages">Toate limbile</string>
+    <string name="skip_similar_entries">Omiteți intrări similare</string>
+    <string name="skip_similar_entries_desc">Stocați numai intrări unice în istoric, bazate pe inserare și limbi.</string>
+    <string name="select_theme">Selectați tema</string>
+    <string name="theme_black">Negru</string>
+    <string name="tess_summary">Tesseract este un motor de recunoaștere optică a caracterelor. Este un software liber, lansat sub licența Apache. A fost lansat ca sursă deschisă în 2005, iar dezvoltarea a fost sponsorizată de Google din 2006. Tesseract este considerat unul dintre cele mai precise motoare OCR cu sursă deschisă disponibile. Pentru mai multe informații, vedeți %1$s.</string>
+    <string name="irreversible">Acest lucru nu poate fi anulat. Sigur vreți să continuați?</string>
+    <string name="clear_favorites">Ștergeți favoritele</string>
+    <string name="clear">Curăță</string>
 </resources>

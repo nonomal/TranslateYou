@@ -1,185 +1,257 @@
+/*
+ * Copyright (c) 2023 You Apps
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.bnyro.translate.ui.components
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Divider
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.unit.sp
 import com.bnyro.translate.DatabaseHolder
 import com.bnyro.translate.R
 import com.bnyro.translate.db.obj.Language
-import com.bnyro.translate.ext.query
-import com.bnyro.translate.ui.models.MainModel
+import com.bnyro.translate.ui.dialogs.FullscreenDialog
+import com.bnyro.translate.ui.models.TranslationModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun LanguageSelector(
     availableLanguages: List<Language>,
     selectedLanguage: Language,
     autoLanguageEnabled: Boolean = false,
+    viewModel: TranslationModel,
+    useElevatedButton: Boolean = true,
     onClick: (Language) -> Unit
 ) {
-    val viewModel: MainModel = viewModel()
+    val scope = rememberCoroutineScope()
 
     var showDialog by remember {
         mutableStateOf(false)
     }
+    val lazyListState = rememberLazyListState()
 
-    ElevatedButton(
-        onClick = { showDialog = !showDialog },
-        modifier = Modifier
-            .padding(5.dp)
-    ) {
+    var searchQuery by remember {
+        mutableStateOf("")
+    }
+
+    val bookmarks = viewModel.bookmarkedLanguages.filter {
+        validateFilter(it, searchQuery)
+    }
+
+    LaunchedEffect(Unit, availableLanguages) {
+        // automatically scroll to the currently selected language
+        var index = bookmarks.indexOfFirst { it == selectedLanguage }
+        if (index == -1) index = bookmarks.size + availableLanguages.indexOfFirst { it == selectedLanguage }
+        if (index != -1) lazyListState.animateScrollToItem(index + 1)
+    }
+
+    if (useElevatedButton) {
+        ElevatedButton(
+            modifier = Modifier
+                .padding(5.dp),
+            shape = RoundedCornerShape(15.dp),
+            onClick = { showDialog = true }
+        ) {
+            Text(
+                modifier = Modifier
+                    .basicMarquee()
+                    .padding(vertical = 7.dp, horizontal = 10.dp),
+                text = selectedLanguage.name,
+                textAlign = TextAlign.Center,
+                maxLines = 1
+            )
+        }
+    } else {
+        val interactionSource = remember {
+            MutableInteractionSource()
+        }
+
         Text(
-            text = selectedLanguage.name
+            modifier = Modifier
+                .basicMarquee()
+                .clip(RoundedCornerShape(10.dp))
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null
+                ) {
+                    showDialog = true
+                }
+                .padding(vertical = 7.dp, horizontal = 10.dp),
+            text = selectedLanguage.name,
+            textAlign = TextAlign.Center,
+            maxLines = 1
         )
     }
 
     val languages = availableLanguages.toMutableList()
 
-    // remove auto language
-    if (autoLanguageEnabled && languages.isNotEmpty()) {
-        languages.add(
-            0,
-            Language("", stringResource(R.string.auto))
-        )
-    }
-
     if (showDialog) {
-        var searchQuery by remember {
-            mutableStateOf("")
-        }
+        val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
+            rememberTopAppBarState()
+        )
 
-        AlertDialog(
+        FullscreenDialog(
+            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             onDismissRequest = {
                 showDialog = false
             },
-            text = {
-                Column {
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = {
-                            searchQuery = it
-                        },
-                        label = {
-                            Text(text = stringResource(R.string.search))
-                        },
-                        leadingIcon = {
-                            Icon(Icons.Default.Search, null)
-                        },
-                        singleLine = true
-                    )
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    LazyColumn(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        items(
-                            viewModel.bookmarkedLanguages.filter {
-                                validateFilter(it, searchQuery)
-                            }
-                        ) {
-                            LanguageItem(
-                                language = it,
-                                isPinned = viewModel.bookmarkedLanguages.contains(it),
-                                onClick = {
-                                    showDialog = false
-                                    viewModel.enqueueTranslation()
-                                    onClick.invoke(it)
-                                },
-                                onPinnedChange = {
-                                    viewModel.bookmarkedLanguages =
-                                        viewModel.bookmarkedLanguages.filter { language ->
-                                            it != language
-                                        }
-                                    query {
-                                        DatabaseHolder.Db.languageBookmarksDao().delete(it)
-                                    }
-                                }
-                            )
-                        }
-
-                        item {
-                            if (viewModel.bookmarkedLanguages.isNotEmpty()) {
-                                Divider(
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier
-                                        .padding(20.dp)
-                                        .size(70.dp, 1.dp)
-                                )
-                            }
-                        }
-
-                        items(
-                            languages.filter {
-                                validateFilter(it, searchQuery)
-                            }
-                        ) {
-                            LanguageItem(
-                                language = it,
-                                isPinned = viewModel.bookmarkedLanguages.contains(it),
-                                onClick = {
-                                    showDialog = false
-                                    viewModel.enqueueTranslation()
-                                    onClick.invoke(it)
-                                },
-                                onPinnedChange = {
-                                    viewModel.bookmarkedLanguages =
-                                        if (viewModel.bookmarkedLanguages.contains(it)) {
-                                            query {
-                                                DatabaseHolder.Db.languageBookmarksDao().delete(it)
-                                            }
-                                            viewModel.bookmarkedLanguages - it
-                                        } else {
-                                            query {
-                                                DatabaseHolder.Db.languageBookmarksDao()
-                                                    .insertAll(it)
-                                            }
-                                            viewModel.bookmarkedLanguages + it
-                                        }
-                                }
-                            )
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showDialog = false
-                    }
-                ) {
-                    Text(
-                        stringResource(
-                            id = R.string.cancel
+            topBar = {
+                SearchAppBar(
+                    title = stringResource(
+                        if (autoLanguageEnabled) R.string.translate_from else R.string.translate_to
+                    ),
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    navigationIcon = {
+                        StyledIconButton(
+                            imageVector = Icons.Default.ArrowBack,
+                            onClick = { showDialog = false }
                         )
-                    )
+                    },
+                    actions = {},
+                    scrollBehavior = scrollBehavior
+                )
+            },
+            content = {
+                LazyColumn(
+                    state = lazyListState
+                ) {
+                    if (autoLanguageEnabled) {
+                        item {
+                            val autoLanguage = Language("", stringResource(R.string.auto))
+                            LanguageItem(
+                                language = autoLanguage,
+                                isPinned = null,
+                                selectedLanguage = selectedLanguage,
+                                onClick = {
+                                    onClick.invoke(autoLanguage)
+                                    showDialog = false
+                                },
+                                onPinnedChange = {}
+                            )
+                        }
+                    }
+
+                    if (bookmarks.isNotEmpty()) {
+                        item {
+                            Text(
+                                modifier = Modifier.padding(
+                                    top = 20.dp,
+                                    bottom = 10.dp,
+                                    start = 15.dp
+                                ),
+                                text = stringResource(R.string.favorites).uppercase(),
+                                color = MaterialTheme.colorScheme.primary,
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
+                    items(bookmarks) {
+                        LanguageItem(
+                            language = it,
+                            isPinned = viewModel.bookmarkedLanguages.contains(it),
+                            selectedLanguage = selectedLanguage,
+                            onClick = {
+                                onClick.invoke(it)
+                                showDialog = false
+                            },
+                            onPinnedChange = {
+                                viewModel.bookmarkedLanguages =
+                                    viewModel.bookmarkedLanguages.filter { language ->
+                                        it != language
+                                    }
+                                scope.launch(Dispatchers.IO) {
+                                    DatabaseHolder.Db.languageBookmarksDao().delete(it)
+                                }
+                            }
+                        )
+                    }
+
+                    item {
+                        Text(
+                            modifier = Modifier.padding(
+                                top = 20.dp,
+                                bottom = 10.dp,
+                                start = 15.dp
+                            ),
+                            text = stringResource(R.string.all_languages).uppercase(),
+                            color = MaterialTheme.colorScheme.primary,
+                            fontSize = 12.sp
+                        )
+                    }
+
+                    items(
+                        languages.filter {
+                            validateFilter(it, searchQuery)
+                        }
+                    ) {
+                        LanguageItem(
+                            language = it,
+                            isPinned = viewModel.bookmarkedLanguages.contains(it),
+                            selectedLanguage = selectedLanguage,
+                            onClick = {
+                                onClick.invoke(it)
+                                showDialog = false
+                            },
+                            onPinnedChange = {
+                                viewModel.bookmarkedLanguages =
+                                    if (viewModel.bookmarkedLanguages.contains(it)) {
+                                        scope.launch(Dispatchers.IO) {
+                                            DatabaseHolder.Db.languageBookmarksDao().delete(it)
+                                        }
+                                        viewModel.bookmarkedLanguages - it
+                                    } else {
+                                        scope.launch(Dispatchers.IO) {
+                                            DatabaseHolder.Db.languageBookmarksDao().insertAll(it)
+                                        }
+                                        viewModel.bookmarkedLanguages + it
+                                    }
+                            }
+                        )
+                    }
                 }
             }
         )
@@ -187,8 +259,8 @@ fun LanguageSelector(
 }
 
 private fun validateFilter(language: Language, query: String): Boolean {
-    if (query == "") return true
-    val lowerQuery = query.lowercase()
-    return language.name.lowercase().contains(lowerQuery) ||
-        language.code.lowercase().contains(lowerQuery)
+    if (query.isEmpty()) return true
+
+    return language.name.lowercase().contains(query, ignoreCase = true) ||
+        language.code.lowercase().contains(query, ignoreCase = true)
 }
