@@ -1,1 +1,1 @@
- Translator built with Material Design 3 (You) using the LibreTranslate API
+Privacy focused translator app built with MD3

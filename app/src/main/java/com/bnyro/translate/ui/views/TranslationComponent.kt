@@ -1,13 +1,31 @@
+/*
+ * Copyright (c) 2023 You Apps
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.bnyro.translate.ui.views
 
-import android.view.ViewTreeObserver
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.os.Build
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -18,14 +36,13 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Translate
-import androidx.compose.material.icons.filled.VolumeUp
-import androidx.compose.material3.Divider
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,202 +50,157 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.core.content.ContextCompat
 import com.bnyro.translate.R
 import com.bnyro.translate.ui.components.ButtonWithIcon
-import com.bnyro.translate.ui.components.StyledIconButton
-import com.bnyro.translate.ui.components.StyledTextField
-import com.bnyro.translate.ui.models.MainModel
-import com.bnyro.translate.util.ClipboardHelper
+import com.bnyro.translate.ui.components.TranslationField
+import com.bnyro.translate.ui.models.TranslationModel
 import com.bnyro.translate.util.Preferences
-import com.bnyro.translate.util.SimTranslationComponent
-import com.bnyro.translate.util.SpeechHelper
 import kotlinx.coroutines.launch
 
 @Composable
-fun TranslationComponent() {
-    val viewModel: MainModel = viewModel()
+fun TranslationComponent(
+    modifier: Modifier,
+    viewModel: TranslationModel,
+    showLanguageSelector: Boolean = false
+) {
     val context = LocalContext.current
-    val view = LocalView.current
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
-
-    val clipboardHelper = ClipboardHelper(
-        LocalContext.current.applicationContext
-    )
+    val clipboard = LocalClipboardManager.current
     var hasClip by remember {
-        mutableStateOf(
-            clipboardHelper.hasClip()
-        )
-    }
-
-    var isKeyboardOpen by remember {
         mutableStateOf(false)
     }
-    // detect whether the keyboard is open or closed
-    DisposableEffect(view) {
-        val listener = ViewTreeObserver.OnGlobalLayoutListener {
-            isKeyboardOpen = ViewCompat.getRootWindowInsets(view)
-                ?.isVisible(WindowInsetsCompat.Type.ime()) ?: true
-        }
 
-        view.viewTreeObserver.addOnGlobalLayoutListener(listener)
-        onDispose {
-            view.viewTreeObserver.removeOnGlobalLayoutListener(listener)
-        }
+    LaunchedEffect(Unit, clipboard) {
+        hasClip = clipboard.hasText() && !clipboard.getText()?.toString().isNullOrBlank()
     }
 
-    Column(
-        modifier = Modifier
-            .padding(15.dp)
-            .fillMaxSize()
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
     ) {
-        Box(
-            modifier = Modifier.weight(1.0f)
+        Column(
+            modifier = Modifier
+                .verticalScroll(scrollState)
+                .fillMaxSize()
         ) {
-            Column(
-                modifier = Modifier
-                    .verticalScroll(scrollState)
-                    .fillMaxSize()
+            TranslationField(
+                translationModel = viewModel,
+                isSourceField = true,
+                text = viewModel.insertedText,
+                language = viewModel.sourceLanguage.copy(
+                    code = viewModel.sourceLanguage.code.ifEmpty {
+                        viewModel.translation.detectedLanguage.orEmpty()
+                    }
+                ),
+                showLanguageSelector = showLanguageSelector,
+                setLanguage = {
+                    if (it == viewModel.targetLanguage) {
+                        viewModel.targetLanguage = viewModel.sourceLanguage
+                    }
+                    viewModel.sourceLanguage = it
+                }
             ) {
-                StyledTextField(
-                    text = viewModel.insertedText,
-                    placeholder = stringResource(R.string.enter_text)
-                ) {
-                    viewModel.insertedText = it
-                    if (it == "") hasClip = clipboardHelper.hasClip()
-                    viewModel.enqueueTranslation()
-                }
+                viewModel.insertedText = it
+                hasClip = clipboard.hasText()
+                viewModel.enqueueTranslation(context)
+            }
 
-                val modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(10.dp)
-
-                if (viewModel.translating) {
-                    LinearProgressIndicator(
-                        modifier = modifier
-                    )
-                } else {
-                    Divider(
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = modifier
-                            .size(70.dp, 1.dp)
-                    )
-                }
-
-                if (viewModel.translation.translatedText != "" && SpeechHelper.ttsAvailable) {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.CenterEnd
-                    ) {
-                        StyledIconButton(
-                            imageVector = Icons.Default.VolumeUp
-                        ) {
-                            SpeechHelper.speak(
-                                context,
-                                viewModel.translation.translatedText,
-                                viewModel.targetLanguage.code
-                            )
-                        }
-                    }
-                }
-
-                if (hasClip && viewModel.insertedText.isBlank()) {
-                    Row {
-                        ButtonWithIcon(
-                            text = stringResource(R.string.paste),
-                            icon = Icons.Default.ContentPaste
-                        ) {
-                            viewModel.insertedText = clipboardHelper.get() ?: ""
-                            viewModel.enqueueTranslation()
-                        }
-
-                        Spacer(
-                            modifier = Modifier
-                                .width(0.dp)
-                        )
-
-                        ButtonWithIcon(
-                            text = stringResource(R.string.forget),
-                            icon = Icons.Default.Clear
-                        ) {
-                            clipboardHelper.clear()
-                            hasClip = false
-                            viewModel.clearTranslation()
-                        }
-                    }
-                } else if (
-                    viewModel.insertedText.isNotBlank() &&
-                    !Preferences.get(Preferences.translateAutomatically, true)
-                ) {
-                    ButtonWithIcon(
-                        text = stringResource(R.string.translate),
-                        icon = Icons.Default.Translate
-                    ) {
-                        viewModel.translate()
-                    }
-                }
-
-                val charPref = Preferences.get(Preferences.charCounterLimitKey, "")
-
-                StyledTextField(
-                    text = viewModel.translation.translatedText,
-                    readOnly = true,
-                    textColor = if (
-                        charPref != "" && viewModel.translation.translatedText.length >= charPref.toInt()
-                    ) {
-                        MaterialTheme.colorScheme.error
-                    } else {
-                        MaterialTheme.typography.bodyMedium.color
-                    }
+            if (viewModel.translating) {
+                LinearProgressIndicator(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(10.dp)
+                )
+            } else {
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(10.dp)
+                        .size(70.dp, 1.dp)
                 )
             }
 
-            if (scrollState.value > 100) {
-                FloatingActionButton(
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(16.dp),
-                    onClick = {
-                        coroutineScope.launch {
-                            scrollState.animateScrollTo(0)
-                        }
+            if (hasClip && viewModel.insertedText.isBlank()) {
+                Row {
+                    ButtonWithIcon(
+                        text = stringResource(R.string.paste),
+                        icon = Icons.Default.ContentPaste
+                    ) {
+                        viewModel.insertedText = clipboard.getText()?.toString().orEmpty()
+                        viewModel.enqueueTranslation(context)
                     }
+
+                    Spacer(
+                        modifier = Modifier
+                            .width(0.dp)
+                    )
+
+                    ButtonWithIcon(
+                        text = stringResource(R.string.forget),
+                        icon = Icons.Default.Clear
+                    ) {
+                        hasClip = false
+
+                        val manager =
+                            ContextCompat.getSystemService(context, ClipboardManager::class.java)
+                                ?: return@ButtonWithIcon
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                            manager.clearPrimaryClip()
+                        } else {
+                            manager.setPrimaryClip(ClipData(null))
+                        }
+
+                        viewModel.clearTranslation()
+                    }
+                }
+            } else if (
+                viewModel.insertedText.isNotBlank() &&
+                !Preferences.get(Preferences.translateAutomatically, true)
+            ) {
+                ButtonWithIcon(
+                    text = stringResource(R.string.translate),
+                    icon = Icons.Default.Translate
                 ) {
-                    Icon(Icons.Default.ArrowUpward, null)
+                    viewModel.translateNow(context)
                 }
             }
-        }
 
-        if (Preferences.get(
-                Preferences.showAdditionalInfo,
-                true
-            ) && !isKeyboardOpen
-        ) {
-            AdditionalInfoComponent(viewModel.translation)
-        }
-
-        Spacer(
-            modifier = Modifier
-                .height(15.dp)
-        )
-
-        if (viewModel.simTranslationEnabled) {
-            SimTranslationComponent()
-        } else {
-            Divider(
-                color = Color.Gray,
-                modifier = Modifier
-                    .align(alignment = Alignment.CenterHorizontally)
-                    .size(70.dp, 2.dp)
+            TranslationField(
+                translationModel = viewModel,
+                isSourceField = false,
+                text = viewModel.translation.translatedText,
+                language = viewModel.targetLanguage,
+                showLanguageSelector = showLanguageSelector,
+                setLanguage = {
+                    if (it == viewModel.sourceLanguage) {
+                        viewModel.sourceLanguage = viewModel.targetLanguage
+                    }
+                    viewModel.targetLanguage = it
+                }
             )
+        }
+
+        if (scrollState.value > 100) {
+            FloatingActionButton(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp),
+                onClick = {
+                    coroutineScope.launch {
+                        scrollState.animateScrollTo(0)
+                    }
+                }
+            ) {
+                Icon(Icons.Default.ArrowUpward, null)
+            }
         }
     }
 }

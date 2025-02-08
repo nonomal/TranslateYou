@@ -1,41 +1,54 @@
+/*
+ * Copyright (c) 2023 You Apps
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.bnyro.translate.const
 
-import com.bnyro.translate.BuildConfig
+import com.bnyro.translate.api.ap.ApEngine
 import com.bnyro.translate.api.deepl.DeeplEngine
+import com.bnyro.translate.api.gl.GlEngine
+import com.bnyro.translate.api.la.LaEngine
 import com.bnyro.translate.api.lt.LTEngine
 import com.bnyro.translate.api.lv.LVEngine
+import com.bnyro.translate.api.mh.MhEngine
 import com.bnyro.translate.api.mm.MMEngine
+import com.bnyro.translate.api.or.OneRingEngine
+import com.bnyro.translate.api.po.PonsEngine
 import com.bnyro.translate.api.reverso.ReversoEngine
 import com.bnyro.translate.api.st.STEngine
-import com.bnyro.translate.util.TranslationEngine
+import com.bnyro.translate.api.wm.WmEngine
 
 object TranslationEngines {
-    val libreTranslate = LTEngine()
-    val lingvaTranslate = LVEngine()
-    val deepl = DeeplEngine()
-    val myMemory = MMEngine()
-    val reverso = ReversoEngine()
-    val simply = STEngine()
-
-    var engines = createEngines()
-
-    private fun createEngines(): List<TranslationEngine> {
-        val engines = mutableListOf<TranslationEngine>()
-
-        engines.add(libreTranslate.create())
-
-        if (BuildConfig.FLAVOR == "libre") return engines
-
-        listOf(lingvaTranslate, deepl, myMemory, reverso, simply).forEach {
-            engines.add(it.create())
-        }
-
-        return engines
+    val engines = listOf(
+        LTEngine(),
+        LVEngine(),
+        DeeplEngine(),
+        MMEngine(),
+        ReversoEngine(),
+        STEngine(),
+        MhEngine(),
+        WmEngine(),
+        GlEngine(),
+        ApEngine(),
+        OneRingEngine(),
+        PonsEngine(),
+        LaEngine()
+    ).map {
+        it.createOrRecreate()
     }
 
-    fun update() {
-        engines.forEach {
-            it.create()
-        }
-    }
+    fun updateAll() = engines.forEach { it.createOrRecreate() }
 }

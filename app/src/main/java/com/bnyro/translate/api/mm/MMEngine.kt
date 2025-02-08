@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2023 You Apps
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.bnyro.translate.api.mm
 
 import com.bnyro.translate.const.ApiKeyState
@@ -14,7 +31,7 @@ class MMEngine : TranslationEngine(
     autoLanguageCode = "Autodetect"
 ) {
     lateinit var api: MyMemory
-    override fun create(): TranslationEngine = apply {
+    override fun createOrRecreate(): TranslationEngine = apply {
         api = RetrofitHelper.createApi(this)
     }
 
@@ -79,6 +96,7 @@ class MMEngine : TranslationEngine(
             "nl-NL" to "Dutch",
             "no-NO" to "Norwegian",
             "ny-MW" to "Nyanja",
+            "or-IN" to "Odia",
             "ur-PK" to "Pakistani",
             "pau-PW" to "Palauan",
             "pa-IN" to "Panjabi",
@@ -93,6 +111,8 @@ class MMEngine : TranslationEngine(
             "si-LK" to "Sinhala",
             "sk-SK" to "Slovak",
             "sm-WS" to "Samoan",
+            "sa-IN" to "Sanskrit",
+            "sat-IN" to "Santali",
             "sn-ZW" to "Shona",
             "so-SO" to "Somali",
             "sq-AL" to "Albanian",
@@ -119,7 +139,7 @@ class MMEngine : TranslationEngine(
             "zu-ZA" to "Zulu"
         )
             .map { Language(it.first, it.second) }
-            .sortedBy { it.name }
+
 
         /* DEPRECATED endpoint apparently
         val request = Request.Builder()
@@ -129,7 +149,7 @@ class MMEngine : TranslationEngine(
         val call = OkHttpClient().newCall(request)
 
         val json = awaitQuery {
-            call.execute().body()!!.string()
+            call.execute().body!!.string()
         }
 
         val el = JsonHelper.json.parseToJsonElement(
@@ -151,7 +171,7 @@ class MMEngine : TranslationEngine(
         val response = api.translate(
             query,
             "${sourceOrAuto(source)}|$target",
-            if (key == "") null else key
+            key.ifEmpty { null }
 
         )
         return Translation(

@@ -12,7 +12,7 @@
     <string name="forget">Oublier</string>
     <!-- Settings -->
     <string name="instance">Instance</string>
-    <string name="api_key">Clé de l\'API</string>
+    <string name="api_key">Clé API</string>
     <string name="options">Paramètres</string>
     <string name="history">Historique</string>
     <string name="about">À propos</string>
@@ -51,9 +51,9 @@
     <string name="definition">Définition</string>
     <string name="example">Exemple</string>
     <string name="similar">Similaire</string>
-    <string name="missing_api_key">Veuillez fournir une clé d\'API dans les paramètres !</string>
+    <string name="missing_api_key">Veuillez fournir une clé API dans les paramètres.</string>
     <string name="general">Général</string>
-    <string name="search">Recherche</string>
+    <string name="search">Rechercher</string>
     <string name="translation">Traduction</string>
     <string name="app_language">Langue de l\'application</string>
     <string name="system">Système</string>
@@ -69,4 +69,21 @@
     <string name="translate">Traduire</string>
     <string name="translate_automatically">Traduire automatiquement</string>
     <string name="translate_automatically_summary">Demander une traduction après un certain délai.</string>
+    <string name="nothing_here">Rien ici.</string>
+    <string name="translate_to">Traduire en</string>
+    <string name="translate_from">Traduire de</string>
+    <string name="accent_color">Couleur d\'accentuation</string>
+    <string name="dynamic_colors">Couleurs dynamiques</string>
+    <string name="favorites">Favoris</string>
+    <string name="all_languages">Toutes les langues</string>
+    <string name="use_free_api_summary">Utilisez l\'API gratuite au lieu de l\'API Pro payante.</string>
+    <string name="use_free_api">Utiliser une API gratuite</string>
+    <string name="theme_black">Noir</string>
+    <string name="skip_similar_entries">Passer les entrées similaires</string>
+    <string name="skip_similar_entries_desc">Ne conserver que des entrées uniques dans l\'historique, en fonction de l\'insertion et des langues.</string>
+    <string name="select_theme">Sélectionner le thème</string>
+    <string name="irreversible">Cela ne peut pas être annulé. Êtes-vous sûr de vouloir continuer \?</string>
+    <string name="tess_summary">Tesseract est un moteur de reconnaissance optique de caractères. Il s\'agit d\'un logiciel libre, publié sous la licence Apache. Il a été publié en tant que source ouverte en 2005 et son développement est parrainé par Google depuis 2006. Tesseract est considéré comme l\'un des moteurs de reconnaissance optique de caractères open-source les plus précis qui soient. Pour plus d\'informations, voir %1$s.</string>
+    <string name="clear_favorites">Supprimer les favoris</string>
+    <string name="clear">Effacer</string>
 </resources>

@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2023 You Apps
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.bnyro.translate.util
 
 import android.content.Context
@@ -9,6 +26,7 @@ object Preferences {
     const val apiKey = "apiKey"
     const val apiTypeKey = "apiTypeKey"
     const val historyEnabledKey = "historyEnabledKey"
+    const val skipSimilarHistoryKey = "skipSimilarHistory"
     const val translateAutomatically = "translateAutomatically"
     const val fetchDelay = "fetchDelay"
     const val compactHistory = "compactHistory"
@@ -17,12 +35,14 @@ object Preferences {
     const val appLanguageKey = "appLanguage"
     const val charCounterLimitKey = "charCountLimit"
     const val tessLanguageKey = "tessLanguage"
+    const val selectedEngine = "selectedEngine"
 
-    const val themeModeKey = "themeMode"
+    const val themeModeKey = "themeModeKey"
+    const val accentColorKey = "accentColor"
     const val sourceLanguage = "sourceLanguage"
     const val targetLanguage = "targetLanguage"
 
-    private lateinit var prefs: SharedPreferences
+    lateinit var prefs: SharedPreferences
 
     fun initialize(context: Context) {
         prefs = context.getSharedPreferences(
@@ -52,10 +72,7 @@ object Preferences {
         }
     }
 
-    fun getThemeMode(): Int {
-        return get(
-            themeModeKey,
-            ThemeMode.AUTO.toString()
-        ).toInt()
-    }
+    fun getThemeMode() = ThemeMode.values()[get(themeModeKey, ThemeMode.AUTO.value.toString()).toInt()]
+
+    fun getAccentColor() = prefs.getString(accentColorKey, null)
 }

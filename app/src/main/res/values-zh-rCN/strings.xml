@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name" translatable="false">Translate You</string>
     <!-- Dialog -->
-    <string name="okay">好的</string>
+    <string name="okay">确定</string>
     <string name="cancel">取消</string>
     <!-- Text -->
     <string name="enter_text">输入文字</string>
@@ -47,7 +47,7 @@
     <string name="open">打开</string>
     <!-- Exception -->
     <string name="server_error">与服务器通信时发生错误。</string>
-    <string name="missing_api_key">请在设置中提供 API 密钥！</string>
+    <string name="missing_api_key">请在设置中提供 API 密钥。</string>
     <!-- Additional Info -->
     <string name="detected_language">检测到的语言</string>
     <string name="definition">定义</string>
@@ -70,4 +70,22 @@
     <string name="translate">翻译</string>
     <string name="translate_automatically">自动翻译</string>
     <string name="translate_automatically_summary">在特定延迟后自动请求翻译。</string>
+    <string name="nothing_here">这里空无一物。</string>
+    <string name="use_free_api">使用免费版 API</string>
+    <string name="use_free_api_summary">使用免费版 API 而非收费的 Pro API。</string>
+    <string name="dynamic_colors">动态取色</string>
+    <string name="accent_color">强调色</string>
+    <string name="translate_to">翻译为</string>
+    <string name="translate_from">翻译自</string>
+    <string name="all_languages">所有语言</string>
+    <string name="favorites">收藏夹</string>
+    <string name="skip_similar_entries">跳过相似条目</string>
+    <string name="skip_similar_entries_desc">根据插入内容和语种，仅将独特的条目存储在历史记录中。</string>
+    <string name="select_theme">选择主题</string>
+    <string name="theme_black">黑色</string>
+    <string name="irreversible">此操作无法撤销。你确定要继续吗？</string>
+    <string name="tess_summary">Tesseract 是一个光学字符识别引擎。 它是根据 Apache 许可证分发的自由软件。其于 2005 年开源发布，自 2006 年以来一直由 Google 赞助开发。Tesseract 被认为是可用的最准确的开源 OCR 引擎之一。 更多信息，请参阅 %1$s.</string>
+    <string name="clear_favorites">清除收藏</string>
+    <string name="clear">清除</string>
+    <string name="invalid_selection_area">选中区域无效！</string>
 </resources>
